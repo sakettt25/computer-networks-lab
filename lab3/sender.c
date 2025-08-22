@@ -29,10 +29,10 @@ int main(int argc, char *argv[])
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
-
+// sender
     memset(&sender_addr, 0, sizeof(sender_addr));
     sender_addr.sin_family = AF_INET;
-    sender_addr.sin_port = htons(sender_port);
+    sender_addr.sin_port = htons(sender_port); // coverts host byte order to sender byte order
     sender_addr.sin_addr.s_addr = INADDR_ANY;
 
     if (bind(sockfd, (struct sockaddr *)&sender_addr, sizeof(sender_addr)) < 0)
@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
         close(sockfd);
         exit(EXIT_FAILURE);
     }
-
+// reciever
     memset(&receiver_addr, 0, sizeof(receiver_addr));
     receiver_addr.sin_family = AF_INET;
     receiver_addr.sin_port = htons(receiver_port);
