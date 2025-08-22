@@ -1,4 +1,4 @@
-// UDP Server - Waits for a message from client and prints it
+// UDP Echo Server - Sends back whatever message it receives
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +16,7 @@ int main() {
     struct sockaddr_in serverAddr, clientAddr;
     char buffer[BUFFER_SIZE];
     int clientAddrLen = sizeof(clientAddr);
-    int bytesReceived;
+    int bytesReceived, bytesSent;
 
     // Initialize Winsock
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
@@ -46,28 +46,42 @@ int main() {
         return 1;
     }
 
-    printf("UDP Server is running on port %d...\n", PORT);
-    printf("Waiting for client message...\n");
+    printf("UDP Echo Server is running on port %d...\n", PORT);
+    printf("Server will echo back any message it receives.\n");
+    printf("Press Ctrl+C to stop the server.\n\n");
 
-    // Receive message from client
-    bytesReceived = recvfrom(serverSocket, buffer, BUFFER_SIZE - 1, 0, 
-                            (struct sockaddr*)&clientAddr, &clientAddrLen);
-    
-    if (bytesReceived == SOCKET_ERROR) {
-        printf("Receive failed. Error Code: %d\n", WSAGetLastError());
-    } else {
+    // Echo service loop - runs continuously
+    while (1) {
+        printf("Waiting for client message...\n");
+        
+        // Receive message from client
+        bytesReceived = recvfrom(serverSocket, buffer, BUFFER_SIZE - 1, 0, 
+                                (struct sockaddr*)&clientAddr, &clientAddrLen);
+        
+        if (bytesReceived == SOCKET_ERROR) {
+            printf("Receive failed. Error Code: %d\n", WSAGetLastError());
+            continue;
+        }
+        
         buffer[bytesReceived] = '\0';  // Null-terminate the received string
-        printf("Received message from client: %s\n", buffer);
         
         // Get client IP address
         char* clientIP = inet_ntoa(clientAddr.sin_addr);
-        printf("Client IP: %s, Port: %d\n", clientIP, ntohs(clientAddr.sin_port));
+        printf("Received from %s:%d: \"%s\"\n", clientIP, ntohs(clientAddr.sin_port), buffer);
+        
+        // Echo the message back to the client
+        bytesSent = sendto(serverSocket, buffer, bytesReceived, 0, 
+                          (struct sockaddr*)&clientAddr, clientAddrLen);
+        
+        if (bytesSent == SOCKET_ERROR) {
+            printf("Send failed. Error Code: %d\n", WSAGetLastError());
+        } else {
+            printf("Echoed back: \"%s\" (%d bytes)\n\n", buffer, bytesSent);
+        }
     }
 
-    // Clean up
+    // Clean up (this code won't be reached in the infinite loop)
     closesocket(serverSocket);
     WSACleanup();
-    
-    printf("Server shutting down...\n");
     return 0;
 }

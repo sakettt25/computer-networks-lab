@@ -36,12 +36,7 @@ int main() {
     serverAddr.sin_port = htons(PORT);
     
     // Convert IP address from text to binary form
-    if (inet_pton(AF_INET, SERVER_IP, &serverAddr.sin_addr) <= 0) {
-        printf("Invalid address/ Address not supported\n");
-        closesocket(clientSocket);
-        WSACleanup();
-        return 1;
-    }
+    serverAddr.sin_addr.s_addr = inet_addr(SERVER_IP);
 
     printf("Sending message to server: %s\n", message);
 
