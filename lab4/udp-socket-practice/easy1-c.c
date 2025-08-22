@@ -13,7 +13,7 @@ int main() {
     WSADATA wsaData;
     SOCKET clientSocket;
     struct sockaddr_in serverAddr;
-    char message[] = "Hello Server";
+    char message[] = "Hello Server Saket";
     int bytesSent;
 
     // Initialize Winsock
